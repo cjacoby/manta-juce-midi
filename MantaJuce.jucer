@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="lvOBmK" name="MantaJuce" projectType="guiapp" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              companyName="Christopher J">
+  <MAINGROUP id="y1Ca3L" name="MantaJuce">
+    <GROUP id="{544370DA-FA95-5CE4-C605-91038BDC9CA2}" name="Source">
+      <FILE id="OXuk2n" name="hid.c" compile="1" resource="0" file="../libmanta/core/extern/hidapi/mac/hid.c"/>
+      <FILE id="BHoRxv" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+      <FILE id="sLYSXg" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
+      <FILE id="tcPOEe" name="MainComponent.cpp" compile="1" resource="0"
+            file="Source/MainComponent.cpp"/>
+    </GROUP>
+    <GROUP id="{74E49D52-2B7B-62ED-1CEE-A227FFFB582F}" name="core">
+      <FILE id="Btt40m" name="Manta.cpp" compile="1" resource="0" file="../libmanta/core/Manta.cpp"/>
+      <FILE id="cG7qqL" name="Manta.h" compile="0" resource="0" file="../libmanta/core/Manta.h"/>
+      <FILE id="TcbE68" name="MantaClient.h" compile="0" resource="0" file="../libmanta/core/MantaClient.h"/>
+      <FILE id="QPnVqb" name="MantaExceptions.h" compile="0" resource="0"
+            file="../libmanta/core/MantaExceptions.h"/>
+      <FILE id="DZSN0e" name="MantaMulti.cpp" compile="1" resource="0" file="../libmanta/core/MantaMulti.cpp"/>
+      <FILE id="SdyODW" name="MantaMulti.h" compile="0" resource="0" file="../libmanta/core/MantaMulti.h"/>
+      <FILE id="OW0HbV" name="MantaServer.h" compile="0" resource="0" file="../libmanta/core/MantaServer.h"/>
+      <FILE id="dLYsrk" name="MantaUSB.cpp" compile="1" resource="0" file="../libmanta/core/MantaUSB.cpp"/>
+      <FILE id="Gzj66o" name="MantaUSB.h" compile="0" resource="0" file="../libmanta/core/MantaUSB.h"/>
+      <FILE id="fniD72" name="MantaVersion.h" compile="0" resource="0" file="../libmanta/core/MantaVersion.h"/>
+      <FILE id="LHnQCH" name="style.css" compile="0" resource="1" file="../libmanta/core/style.css"/>
+    </GROUP>
+  </MAINGROUP>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX" microphonePermissionNeeded="1">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="NewProject" headerPath="/usr/local/Cellar/hidapi/0.9.0/include/hidapi/&#10;/Users/cjacoby/Development/libmanta/core"
+                       libraryPath="/usr/local/Cellar/"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="NewProject"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../JUCE-5.4.5/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../JUCE-5.4.5/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../JUCE-5.4.5/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../JUCE-5.4.5/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../JUCE-5.4.5/modules"/>
+        <MODULEPATH id="juce_core" path="../../JUCE-5.4.5/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../JUCE-5.4.5/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../JUCE-5.4.5/modules"/>
+        <MODULEPATH id="juce_events" path="../../JUCE-5.4.5/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../JUCE-5.4.5/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../JUCE-5.4.5/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../JUCE-5.4.5/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../JUCE-5.4.5/modules"/>
+        <MODULEPATH id="juce_osc" path="../../JUCE-5.4.5/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_osc" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <LIVE_SETTINGS>
+    <OSX/>
+  </LIVE_SETTINGS>
+</JUCERPROJECT>
