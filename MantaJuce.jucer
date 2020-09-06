@@ -5,6 +5,11 @@
               companyName="Christopher J">
   <MAINGROUP id="y1Ca3L" name="MantaJuce">
     <GROUP id="{544370DA-FA95-5CE4-C605-91038BDC9CA2}" name="Source">
+      <FILE id="UV1H4Z" name="BufferManager.h" compile="0" resource="0" file="Source/BufferManager.h"/>
+      <FILE id="gOoihJ" name="SettingsPanel.h" compile="0" resource="0" file="Source/SettingsPanel.h"/>
+      <FILE id="j3Pj1y" name="HeaderPanel.h" compile="0" resource="0" file="Source/HeaderPanel.h"/>
+      <FILE id="CxVFxD" name="MantaPadDrawer.h" compile="0" resource="0"
+            file="Source/MantaPadDrawer.h"/>
       <FILE id="OXuk2n" name="hid.c" compile="1" resource="0" file="../libmanta/core/extern/hidapi/mac/hid.c"/>
       <FILE id="BHoRxv" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="sLYSXg" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
