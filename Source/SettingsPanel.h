@@ -15,9 +15,21 @@
 //==============================================================================
 /*
 */
-class SettingsPanel  : public juce::Component
+class SettingsPanel  : public juce::Component,
+                       public juce::ChangeBroadcaster
 {
 public:
+    //==============================================================================
+    class Listener
+    {
+    public:
+        virtual ~Listener() {}
+        virtual void mpeMidiReset() = 0;
+    };
+    
+    void addListener (Listener* listenerToAdd)         { listeners.add (listenerToAdd); }
+    void removeListener (Listener* listenerToRemove)   { listeners.remove (listenerToRemove); }
+    
     SettingsPanel(juce::AudioAppComponent& parent) : parent(parent)
     {
         // In your constructor, you should add any child components, and
@@ -25,6 +37,10 @@ public:
         addAndMakeVisible (&openButton);
         openButton.setButtonText ("Open ...");
         openButton.onClick = [this] { loadAudioFile(); };
+        
+        addAndMakeVisible (resetMPEButton);
+        resetMPEButton.onClick = [this] { resetMPEButtonClicked(); };
+//        resetMPEButton.onClick = [this] { parent.initMPE(); };
     }
 
     ~SettingsPanel() override
@@ -58,7 +74,8 @@ public:
         // components that your component contains..
         auto bounds = getLocalBounds();
         
-        openButton.setBounds (bounds.removeFromTop(20).reduced(2));
+        openButton.setBounds (bounds.removeFromTop(30).reduced(5));
+        resetMPEButton.setBounds (bounds.removeFromTop(30).reduced(5));
     }
     
     void loadAudioFile()
@@ -99,6 +116,11 @@ public:
     }
 
 private:
+    void resetMPEButtonClicked()
+    {
+        listeners.call ([this] (Listener& l) { l.mpeMidiReset (); });
+    }
+    
     juce::AudioAppComponent&        parent;
     juce::AudioFormatManager        formatManager;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
@@ -107,6 +129,10 @@ private:
     juce::AudioSampleBuffer         fileBuffer;
     int position = 0;
     
+    juce::TextButton resetMPEButton { "Reset MPE" };
+    
     juce::TextButton                openButton;
+    
+    juce::ListenerList<Listener> listeners;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsPanel)
 };

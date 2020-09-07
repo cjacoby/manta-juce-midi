@@ -11,6 +11,7 @@ static juce::ValueTree createRootValueTree()
     {
         juce::ValueTree pad ("pad" + juce::String(i));
         pad.setProperty ("value", 0, nullptr);
+        pad.setProperty ("channel", -1, nullptr);
         pads.appendChild (pad, nullptr);
     }
     root.appendChild (pads, nullptr);
@@ -134,8 +135,14 @@ MainComponent::MainComponent()
 //    state.addListener (&bufferManager);
     
     startTimer(5);
-    
     Connect();
+    
+    // Initialize the midi output
+    virtualMidiOutput = juce::MidiOutput::createNewDevice ("Manta");
+    zoneLayout.reset (new juce::MPEZoneLayout());
+    zoneLayout->setLowerZone(15);
+    mpeChannelAssigner.reset (new juce::MPEChannelAssigner (zoneLayout->getLowerZone()));
+    
     
     levelSlider.setRange (0.0, 0.9);
     levelSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 100, 20);
@@ -147,6 +154,8 @@ MainComponent::MainComponent()
     addAndMakeVisible (headerPanel);
     addAndMakeVisible (audioSettings);
     addAndMakeVisible (leftPanel);
+    leftPanel.addListener (this);
+    
     addAndMakeVisible (padDrawerComponent);
     addAndMakeVisible (levelSlider);
     addAndMakeVisible (levelLabel);
@@ -250,6 +259,15 @@ void MainComponent::resized()
     // update their positions.
 }
 
+void MainComponent::mpeMidiReset()
+{
+    juce::MidiBuffer buffer;
+    buffer.addEvents (juce::MPEMessages::clearAllZones (), 0, 0, 0);
+    buffer.addEvents (juce::MPEMessages::setLowerZone(), 0, 0, 0);
+    
+    virtualMidiOutput->sendBlockOfMessagesNow(buffer);
+}
+
 //==============================================================================
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
@@ -311,15 +329,54 @@ void MainComponent::timerCallback()
     Manta::HandleEvents();
 }
 
+void MainComponent::PadVelocityEvent(int row, int column, int id, int velocity)
+{
+    padVelocityMax = (int)fmax(velocity, padVelocityMax);
+    float floatVelocity = velocity / (float)padVelocityMax;
+    
+    int midiNote = midiNoteForPad(id);
+    
+    juce::MidiMessage note;
+    if (velocity > 0)
+    {
+        int channel = getOrSetNewChannel(id, midiNote);
+        std::cout << "noteOn event: " << id << " v" << floatVelocity << " c" << channel << std::endl;
+        note = juce::MidiMessage::noteOn (channel, midiNote, floatVelocity);
+    }
+    else
+    {
+        int currentChannel = getActiveChannel(id);
+        
+        mpeChannelAssigner->noteOff (midiNote);
+        note = juce::MidiMessage::noteOff(currentChannel, midiRoot + id);
+        
+        std::cout << "noteOff event: " << id << " c" << currentChannel << std::endl;
+        
+        // Reset the channel on noteoff to -1
+        setActiveChannel(id, -1);
+    }
+    
+    virtualMidiOutput->sendMessageNow (note);
+}
+
 void MainComponent::PadEvent(int row, int column, int id, int value)
 {
-    juce::Identifier padID = "pad" + juce::String(id);
-    std::cout << "pad event: " << row << " " << column << " " << id << " " << value << std::endl;
+    int padMax = 220;
+    int aftertouchAmount = juce::jlimit(0, 128, (int)((value / (float)padMax) * 128));
+//    std::cout << "pad event: " << row << " " << column << " " << id << " " << value << std::endl;
+    
+    // Send poly aftertouch for this note
+    int midiNote = midiNoteForPad(id);
+    int currentChannel = getOrSetNewChannel(id, midiNote);
+    juce::MidiMessage aftertouch = juce::MidiMessage::aftertouchChange(currentChannel, id, aftertouchAmount);
+    virtualMidiOutput->sendMessageNow (aftertouch);
+    
     if (state.isValid())
     {
         auto padsNode = state.getChildWithName ("pads");
         if (padsNode.isValid() && padsNode.getNumChildren())
         {
+            juce::Identifier padID = "pad" + juce::String(id);
             auto padNode = padsNode.getChildWithName (padID);
             padNode.setProperty ("value", value, nullptr);
         }
@@ -349,4 +406,58 @@ void MainComponent::SliderEvent(int id, int value)
             sliderNode.setProperty ("normalizedValue", value / 4096.0, nullptr);
         }
     }
+}
+
+int MainComponent::midiNoteForPad (int padID)
+{
+    return midiRoot + padID;
+}
+
+
+int MainComponent::getOrSetNewChannel(int id, int midiNote)
+{
+    int currentChannel = getActiveChannel(id);
+    
+    if (currentChannel == -1)
+    {
+        currentChannel = mpeChannelAssigner->findMidiChannelForNewNote (midiNote);
+        setActiveChannel (id, currentChannel);
+    }
+    
+    return currentChannel;
+}
+
+
+void MainComponent::setActiveChannel(int id, int channel)
+{
+    juce::Identifier padID = "pad" + juce::String(id);
+    
+    if (state.isValid())
+    {
+        auto padsNode = state.getChildWithName ("pads");
+        if (padsNode.isValid())
+        {
+            auto padNode = padsNode.getChildWithName (padID);
+            padNode.setProperty ("channel", channel, nullptr);
+        }
+    }
+}
+
+
+int MainComponent::getActiveChannel(int id)
+{
+    int channel = -1;
+    juce::Identifier padID = "pad" + juce::String(id);
+    
+    if (state.isValid())
+    {
+        auto padsNode = state.getChildWithName ("pads");
+        if (padsNode.isValid())
+        {
+            auto padNode = padsNode.getChildWithName (padID);
+            
+            channel = padNode.getProperty ("channel");
+        }
+    }
+    return channel;
 }

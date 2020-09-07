@@ -59,6 +59,7 @@ private:
 */
 class MainComponent  : public juce::AudioAppComponent,
                        public juce::Timer,
+                       public SettingsPanel::Listener,
                        private Manta
 {
 public:
@@ -70,6 +71,12 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     
+    // MPE
+    /**
+     * Send MPE messages to device.
+     */
+    void mpeMidiReset();
+    
     //==============================================================================
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
     void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override;
@@ -77,12 +84,37 @@ public:
     
     void timerCallback() override;
     
+    void PadVelocityEvent(int row, int column, int id, int velocity) override;
     void PadEvent(int row, int column, int id, int value) override;
     void SliderEvent(int id, int value) override;
 
 private:
+    int midiNoteForPad(int padID);
+    
+    /**
+     * Get the current channel if set, or return a new one.
+     */
+    int getOrSetNewChannel(int padID, int midiNote);
+    
+    /**
+     * Set the currently used channel in the ValueTree state.
+     */
+    void setActiveChannel(int padID, int channel);
+    
+    /**
+     * Get the currently used channel in the ValueTree state.
+     */
+    int getActiveChannel(int padID);
     //==============================================================================
     juce::ValueTree state;
+    
+    // Midi settings
+    int padVelocityMax {100};
+    int midiRoot {48};
+    
+    std::unique_ptr<juce::MidiOutput>         virtualMidiOutput;
+    std::unique_ptr<juce::MPEZoneLayout>      zoneLayout;
+    std::unique_ptr<juce::MPEChannelAssigner> mpeChannelAssigner;
     
     int padState[48] {0};
     SettingsPanel leftPanel;
