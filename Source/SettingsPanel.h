@@ -25,6 +25,7 @@ public:
     public:
         virtual ~Listener() {}
         virtual void mpeMidiReset() = 0;
+        virtual void mpeControlTypeChange(int type) = 0;
     };
     
     void addListener (Listener* listenerToAdd)         { listeners.add (listenerToAdd); }
@@ -41,6 +42,14 @@ public:
         addAndMakeVisible (resetMPEButton);
         resetMPEButton.onClick = [this] { resetMPEButtonClicked(); };
 //        resetMPEButton.onClick = [this] { parent.initMPE(); };
+        
+        addAndMakeVisible      (mpeControlMenu);
+        mpeControlMenu.addItem ("aftertouch",      1);
+        mpeControlMenu.addItem ("channelPressure", 2);
+        mpeControlMenu.addItem ("pitch bend",      3);
+        mpeControlMenu.addItem ("timbre",          4);
+        mpeControlMenu.onChange = [this] { mpeControlChanged(); };
+        mpeControlMenu.setSelectedId (1);
     }
 
     ~SettingsPanel() override
@@ -74,8 +83,9 @@ public:
         // components that your component contains..
         auto bounds = getLocalBounds();
         
-        openButton.setBounds (bounds.removeFromTop(30).reduced(5));
+        openButton.setBounds     (bounds.removeFromTop(30).reduced(5));
         resetMPEButton.setBounds (bounds.removeFromTop(30).reduced(5));
+        mpeControlMenu.setBounds (bounds.removeFromTop(30).reduced(5));
     }
     
     void loadAudioFile()
@@ -121,6 +131,13 @@ private:
         listeners.call ([this] (Listener& l) { l.mpeMidiReset (); });
     }
     
+    void mpeControlChanged()
+    {
+        listeners.call ([this] (Listener& l) {
+            l.mpeControlTypeChange (mpeControlMenu.getSelectedId());
+        });
+    }
+    
     juce::AudioAppComponent&        parent;
     juce::AudioFormatManager        formatManager;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
@@ -130,6 +147,7 @@ private:
     int position = 0;
     
     juce::TextButton resetMPEButton { "Reset MPE" };
+    juce::ComboBox   mpeControlMenu;
     
     juce::TextButton                openButton;
     

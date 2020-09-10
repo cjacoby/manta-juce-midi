@@ -268,6 +268,11 @@ void MainComponent::mpeMidiReset()
     virtualMidiOutput->sendBlockOfMessagesNow(buffer);
 }
 
+void MainComponent::mpeControlTypeChange(int type)
+{
+    mpeControlType = type;
+}
+
 //==============================================================================
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
@@ -362,14 +367,38 @@ void MainComponent::PadVelocityEvent(int row, int column, int id, int velocity)
 void MainComponent::PadEvent(int row, int column, int id, int value)
 {
     int padMax = 220;
-    int aftertouchAmount = juce::jlimit(0, 128, (int)((value / (float)padMax) * 128));
 //    std::cout << "pad event: " << row << " " << column << " " << id << " " << value << std::endl;
     
     // Send poly aftertouch for this note
     int midiNote = midiNoteForPad(id);
     int currentChannel = getOrSetNewChannel(id, midiNote);
-    juce::MidiMessage aftertouch = juce::MidiMessage::aftertouchChange(currentChannel, id, aftertouchAmount);
-    virtualMidiOutput->sendMessageNow (aftertouch);
+    juce::MidiMessage continuousChange;
+    switch (mpeControlType)
+    {
+        case 1: {
+            int aftertouchAmount = juce::jlimit(0, 128, (int)((value / (float)padMax) * 128));
+            continuousChange = juce::MidiMessage::aftertouchChange(currentChannel, id, aftertouchAmount);
+            break;
+        }
+        case 2: {
+            int channelPressureAmount = juce::jlimit(0, 128, (int)((value / (float)padMax) * 128));
+            continuousChange = juce::MidiMessage::channelPressureChange(currentChannel, channelPressureAmount);
+            break;
+        }
+        case 3: {
+            int pitchWheelPosition = juce::jlimit(0, 0x4000, (int)((value / (float)padMax) * 0x4000));  // 0x4000 is pitch wheel max
+            continuousChange = juce::MidiMessage::pitchWheel(currentChannel, pitchWheelPosition);
+            break;
+        }
+        case 4: {
+            int controllerAmount = juce::jlimit(0, 128, (int)((value / (float)padMax) * 128));
+            continuousChange = juce::MidiMessage::controllerEvent(currentChannel, 74, controllerAmount);
+            break;
+        }
+        default: break;
+    }
+    
+    virtualMidiOutput->sendMessageNow (continuousChange);
     
     if (state.isValid())
     {

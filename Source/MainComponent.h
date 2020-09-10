@@ -76,6 +76,7 @@ public:
      * Send MPE messages to device.
      */
     void mpeMidiReset();
+    void mpeControlTypeChange(int type);
     
     //==============================================================================
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
@@ -90,6 +91,7 @@ public:
 
 private:
     int midiNoteForPad(int padID);
+    int mpeControlType {1};
     
     /**
      * Get the current channel if set, or return a new one.
