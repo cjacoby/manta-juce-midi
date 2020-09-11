@@ -12,6 +12,12 @@ static juce::ValueTree createRootValueTree()
         juce::ValueTree pad ("pad" + juce::String(i));
         pad.setProperty ("value", 0, nullptr);
         pad.setProperty ("channel", -1, nullptr);
+        
+        int column = i % 8;
+        int row = i / 8;
+        int noteOffset = row % 2 == 0 ? (row / 2) * 12 : ((row - 1) / 2 * 12) + 7 ;
+        noteOffset += (column * 2);
+        pad.setProperty ("noteOffset", noteOffset, nullptr);
         pads.appendChild (pad, nullptr);
     }
     root.appendChild (pads, nullptr);
@@ -345,7 +351,7 @@ void MainComponent::PadVelocityEvent(int row, int column, int id, int velocity)
     if (velocity > 0)
     {
         int channel = getOrSetNewChannel(id, midiNote);
-        std::cout << "noteOn event: " << id << " v" << floatVelocity << " c" << channel << std::endl;
+        std::cout << "noteOn event: " << id << " v" << floatVelocity << " c" << channel << " n" << midiNote << std::endl;
         note = juce::MidiMessage::noteOn (channel, midiNote, floatVelocity);
     }
     else
@@ -353,9 +359,9 @@ void MainComponent::PadVelocityEvent(int row, int column, int id, int velocity)
         int currentChannel = getActiveChannel(id);
         
         mpeChannelAssigner->noteOff (midiNote);
-        note = juce::MidiMessage::noteOff(currentChannel, midiRoot + id);
+        note = juce::MidiMessage::noteOff(currentChannel, midiNote);
         
-        std::cout << "noteOff event: " << id << " c" << currentChannel << std::endl;
+        std::cout << "noteOff event: " << id << " c" << currentChannel <<" n" << midiNote << std::endl;
         
         // Reset the channel on noteoff to -1
         setActiveChannel(id, -1);
@@ -377,7 +383,7 @@ void MainComponent::PadEvent(int row, int column, int id, int value)
     {
         case 1: {
             int aftertouchAmount = juce::jlimit(0, 128, (int)((value / (float)padMax) * 128));
-            continuousChange = juce::MidiMessage::aftertouchChange(currentChannel, id, aftertouchAmount);
+            continuousChange = juce::MidiMessage::aftertouchChange(currentChannel, midiNote, aftertouchAmount);
             break;
         }
         case 2: {
@@ -437,9 +443,21 @@ void MainComponent::SliderEvent(int id, int value)
     }
 }
 
-int MainComponent::midiNoteForPad (int padID)
+int MainComponent::midiNoteForPad (int id)
 {
-    return midiRoot + padID;
+    int padNote = midiRoot;
+    juce::Identifier padID = "pad" + juce::String(id);
+    if (state.isValid())
+    {
+        auto padsNode = state.getChildWithName ("pads");
+        if (padsNode.isValid())
+        {
+            auto padNode = padsNode.getChildWithName (padID);
+            int noteOffset = padNode.getProperty("noteOffset");
+            padNote += noteOffset;
+        }
+    }
+    return padNote;
 }
 
 
