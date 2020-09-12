@@ -6,6 +6,14 @@
     Author:  Christopher Jacoby
 
   ==============================================================================
+ SVG PATH Def
+ 
+ M 0 1.25 L 0 5.25 L 1 5.75
+ L 1 1.75 L 2 1.25 L 2 6.25
+ L 3 6.75 L 4 6.25 L 4 1.25
+ L 5 1.75 L 5 5.75 L 6 5.25
+ L 6 1.25 L 3.5 0 L 3.5 6
+ L 3 6.25 L 2.5 6 L 2.5 0 L 0 1.25
 */
 
 #pragma once
@@ -23,7 +31,26 @@ public:
     {
         // In your constructor, you should add any child components, and
         // initialise any special settings that your component needs.
-
+        mantaPath.clear();
+        mantaPath.startNewSubPath (0.0f, 1.25f);
+        mantaPath.lineTo          (0.0f, 5.25f);
+        mantaPath.lineTo          (1.0f, 5.75f);
+        mantaPath.lineTo          (1.0f, 1.75f);
+        mantaPath.lineTo          (2.0f, 1.25f);
+        mantaPath.lineTo          (2.0f, 6.25f);
+        mantaPath.lineTo          (3.0f, 6.75f);
+        mantaPath.lineTo          (4.0f, 6.25f);
+        mantaPath.lineTo          (4.0f, 1.25f);
+        mantaPath.lineTo          (5.0f, 1.75f);
+        mantaPath.lineTo          (5.0f, 5.75f);
+        mantaPath.lineTo          (6.0f, 5.25f);
+        mantaPath.lineTo          (6.0f, 1.25f);
+        mantaPath.lineTo          (3.5f, 0.0f);
+        mantaPath.lineTo          (3.5f, 6.0f);
+        mantaPath.lineTo          (3.0f, 6.25f);
+        mantaPath.lineTo          (2.5f, 6.0f);
+        mantaPath.lineTo          (2.5f, 0.0f);
+        mantaPath.lineTo          (0.0f, 1.25f);
     }
 
     ~MantaPadDrawer() override
@@ -43,7 +70,7 @@ public:
         
         g.setFont (juce::Font (16.0f));
         g.setColour (juce::Colours::white);
-        g.drawText ("Hello World!", getLocalBounds(), juce::Justification::centred, true);
+//        g.drawText ("Hello World!", getLocalBounds(), juce::Justification::centred, true);
         
         juce::Colour fillColor = juce::Colours::orange;
         for (auto i = 0; i < 6; ++i) {
@@ -57,10 +84,19 @@ public:
                 auto cellBox = rowBox.removeFromLeft (columnSize);
 //                auto padValue = padState[i * 8 + j];
                 
-                g.setColour (fillColor.withAlpha (padValue / 255.0f));
-                g.fillRect (cellBox);
+//                g.setColour (fillColor.withAlpha (padValue / 255.0f));
+//                g.fillRect (cellBox);
+                
+                juce::Path mantaPathCopy (mantaPath);
+                mantaPathCopy.applyTransform (mantaPathCopy.getTransformToScaleToFit (cellBox.reduced(2).toFloat(), true));
+
+                g.setColour (juce::Colours::darkkhaki);
+                g.strokePath (mantaPathCopy, juce::PathStrokeType (1.0f));
                 if (padValue > 0)
                 {
+                    g.setColour (fillColor.withAlpha (padValue / 225.0f));
+                    g.fillPath (mantaPathCopy);
+                    
                     g.setColour (juce::Colours::white);
                     g.drawText (juce::String(padValue), cellBox, juce::Justification::centred, true);
                 }
@@ -82,6 +118,7 @@ public:
 
 private:
     juce::ValueTree padState;
+    juce::Path mantaPath;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MantaPadDrawer)
 };
