@@ -140,7 +140,7 @@ MainComponent::MainComponent()
     state.addListener (&padDrawerComponent);
 //    state.addListener (&bufferManager);
     
-    startTimer(5);
+    startTimer(3);
     Connect();
     
     // Initialize the midi output
@@ -302,18 +302,18 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
     auto maxOutputChannels = activeOutputChannels.getHighestBit() + 1;
 
     // Your audio-processing code goes here!
-    auto level = (float) levelSlider.getValue();
-    
-    for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); ++channel)
-    {
-        auto* buffer = bufferToFill.buffer->getWritePointer (channel, bufferToFill.startSample);
-        
-        for (auto sample = 0; sample < bufferToFill.numSamples; ++sample)
-        {
-            auto noise = random.nextFloat() * 2.0f - 1.0f;
-            buffer[sample] = noise * level;
-        }
-    }
+//    auto level = (float) levelSlider.getValue();
+//
+//    for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); ++channel)
+//    {
+//        auto* buffer = bufferToFill.buffer->getWritePointer (channel, bufferToFill.startSample);
+//
+//        for (auto sample = 0; sample < bufferToFill.numSamples; ++sample)
+//        {
+//            auto noise = random.nextFloat() * 2.0f - 1.0f;
+//            buffer[sample] = noise * level;
+//        }
+//    }
     
     // For more details, see the help for AudioProcessor::getNextAudioBlock()
     
@@ -322,7 +322,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 
     
     
-    //    bufferToFill.clearActiveBufferRegion();
+        bufferToFill.clearActiveBufferRegion();
     
     
 }
@@ -373,7 +373,11 @@ void MainComponent::PadVelocityEvent(int row, int column, int id, int velocity)
 void MainComponent::PadEvent(int row, int column, int id, int value)
 {
     int padMax = 220;
-//    std::cout << "pad event: " << row << " " << column << " " << id << " " << value << std::endl;
+    auto timeElapsed = std::chrono::steady_clock::now();
+    std::cout << "pad event: " << row << " " << column << " " << id << " " << value << " elapsed since last:"
+              << std::chrono::duration_cast<std::chrono::milliseconds>(timeElapsed - lastPadEvent).count() << std::endl;
+    
+    lastPadEvent = timeElapsed;
     
     // Send poly aftertouch for this note
     int midiNote = midiNoteForPad(id);

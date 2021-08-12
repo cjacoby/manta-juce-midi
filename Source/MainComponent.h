@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <JuceHeader.h>
 #include "Manta.h"
 
@@ -121,7 +122,7 @@ private:
     int padState[48] {0};
     SettingsPanel leftPanel;
     HeaderPanel headerPanel;
-    MantaPadDrawer padDrawerComponent;
+    MantaPadContainerComponent padDrawerComponent;
     
     void showAudioWindow();
     SafePointer<AudioSetupModal> audioDialogWindow;
@@ -132,6 +133,8 @@ private:
     juce::Slider levelSlider;
     juce::Label  levelLabel;
 //    juce::AudioSampleBuffer
+    
+    std::chrono::system_clock::time_point lastPadEvent;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
